@@ -11,5 +11,5 @@ do_install() {
 	install -m 0755 imx8-media-dev.conf ${D}/etc/modprobe.d/
 }
 
-FILES_${PN} += "/etc/modprobe.d"
+FILES:${PN} += "/etc/modprobe.d"
 

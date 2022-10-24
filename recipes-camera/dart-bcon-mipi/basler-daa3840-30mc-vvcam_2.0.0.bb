@@ -5,4 +5,4 @@ SRC_URI[tarball.sha256sum] = "8b2416e218be0c9c0a06990bfaa2de75af01f03472191778db
 
 require basler-dart-bcon-mipi.inc
 
-RDEPENDS_${PN} = "basler-daa3840-30mc-imx-isp-driver imx-gpu-g2d"
+RDEPENDS:${PN} = "basler-daa3840-30mc-imx-isp-driver imx-gpu-g2d"

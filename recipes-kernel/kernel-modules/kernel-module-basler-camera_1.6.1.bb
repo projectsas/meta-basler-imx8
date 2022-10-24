@@ -9,8 +9,8 @@ SRC_URI[sha256sum] = "c2e62fc7774da42cbbf1043a8d06c262b68b05632ab666ce60118c9133
 S = "${WORKDIR}/basler-camera-driver_${PV}/basler-camera-driver"
 
 
-FILES_${PN}-dev = "${includedir}/linux/basler-camera-driver.h"
-do_install_append() {
+FILES:${PN}-dev = "${includedir}/linux/basler-camera-driver.h"
+do_install:append() {
     install -d ${D}${includedir}/linux
     install -m 644 ${S}/basler-camera-driver.h ${D}${includedir}/linux/basler-camera-driver.h
     rm -R ${D}${includedir}/${PN}/
