@@ -1,7 +1,7 @@
-From 945fa0177b3c15125ff10e7eb43636773ac6d21a Mon Sep 17 00:00:00 2001
+From 065217a7b1720b4b02c5f8ca741cac74fc73f2b2 Mon Sep 17 00:00:00 2001
 From: Marvin Schmidt <Marvin.Schmidt@baslerweb.com>
 Date: Tue, 17 Dec 2019 18:10:27 +0100
-Subject: [PATCH 10/27] media: mxc: Enable dual pixel mode for YUV422
+Subject: [PATCH 10/15] media: mxc: Enable dual pixel mode for YUV422
 
 On the imx8mm the MIPI CSI-2 receiver can be configured to transfer two
 pixel components of YUV422 per clock cycle by setting the PIXEL_MODE
@@ -32,7 +32,7 @@ or not
  2 files changed, 6 insertions(+)
 
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index f1a1ed1cf..dd1bb3d57 100644
+index bf0c85e3c220..7b31d86dddd5 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -902,6 +902,7 @@ static int mx6s_configure_csi(struct mx6s_csi_dev *csi_dev)
@@ -44,10 +44,10 @@ index f1a1ed1cf..dd1bb3d57 100644
  		case V4L2_PIX_FMT_SRGGB8:
  		case V4L2_PIX_FMT_SBGGR8:
 diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-index 898464221..e8741ac0d 100644
+index 8e8c09288476..c50ad3a0b686 100644
 --- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 +++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-@@ -484,6 +484,11 @@ static void __mipi_csis_set_format(struct csi_state *state)
+@@ -483,6 +483,11 @@ static void __mipi_csis_set_format(struct csi_state *state)
  	/* Color format */
  	val = mipi_csis_read(state, MIPI_CSIS_ISPCONFIG_CH0);
  	val = (val & ~MIPI_CSIS_ISPCFG_FMT_MASK) | state->csis_fmt->fmt_reg;
@@ -60,5 +60,5 @@ index 898464221..e8741ac0d 100644
  
  	/* Pixel resolution */
 -- 
-2.32.0
+2.33.0
 

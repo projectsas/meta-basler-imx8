@@ -1,7 +1,7 @@
-From a9cf8acf17ec6f21d90b287ddac042d08c8e9199 Mon Sep 17 00:00:00 2001
+From b63b670f6cbeb0a7393040fc8623a6e2e9b247bd Mon Sep 17 00:00:00 2001
 From: Tobias Klinke <TobiasAlexander.Klinke@baslerweb.com>
 Date: Fri, 12 Feb 2021 12:08:41 +0100
-Subject: [PATCH 20/27] media: mxc: change mx6s_fmt.bpp to bits per pixel
+Subject: [PATCH 14/15] media: mxc: change mx6s_fmt.bpp to bits per pixel
 
 The previous meaning was bytes per pixel.
 This commit prepares for adding YUV420 support
@@ -11,7 +11,7 @@ which will be 12 bits per pixel.
  1 file changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index d31735672..90543e9de 100644
+index e2b2fe79451b..1e4fc655d0d7 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -275,43 +275,43 @@ static struct mx6s_fmt formats[] = {
@@ -77,5 +77,5 @@ index d31735672..90543e9de 100644
  	pix->colorspace = V4L2_COLORSPACE_SRGB;
  	pix->ycbcr_enc = V4L2_MAP_YCBCR_ENC_DEFAULT(pix->colorspace);
 -- 
-2.32.0
+2.33.0
 

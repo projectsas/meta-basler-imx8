@@ -1,7 +1,7 @@
-From 8be0965dfe8d4b688d07256cb52f441074ec0b44 Mon Sep 17 00:00:00 2001
+From cea30eac7c423a768a145d69f9494e37d1b89913 Mon Sep 17 00:00:00 2001
 From: Stefan Klug <klug.stefan@gmx.de>
 Date: Sun, 2 Feb 2020 19:14:24 +0000
-Subject: [PATCH 09/27] media: mxc: capture: Enable two_8bit_sensor_mode based
+Subject: [PATCH 09/15] media: mxc: capture: Enable two_8bit_sensor_mode based
  on video format
 
 This code is hacky and only works on the imx8mq.
@@ -11,7 +11,7 @@ On the imx8mm Raw8 can also be transferred using 16bit per pixel clock
  1 file changed, 7 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index 2cb581226..f1a1ed1cf 100644
+index eba3880de63e..bf0c85e3c220 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -598,8 +598,11 @@ static void csi_dmareq_rff_enable(struct mx6s_csi_dev *csi_dev)
@@ -65,7 +65,7 @@ index 2cb581226..f1a1ed1cf 100644
  static int mx6sx_register_subdevs(struct mx6s_csi_dev *csi_dev)
  {
  	struct device_node *parent = csi_dev->dev->of_node;
-@@ -2048,7 +2041,6 @@ static int mx6s_csi_probe(struct platform_device *pdev)
+@@ -2045,7 +2038,6 @@ static int mx6s_csi_probe(struct platform_device *pdev)
  	csi_dev->dev = dev;
  
  	mx6s_csi_mode_sel(csi_dev);
@@ -74,5 +74,5 @@ index 2cb581226..f1a1ed1cf 100644
  	of_id = of_match_node(mx6s_csi_dt_ids, csi_dev->dev->of_node);
  	if (!of_id)
 -- 
-2.32.0
+2.33.0
 

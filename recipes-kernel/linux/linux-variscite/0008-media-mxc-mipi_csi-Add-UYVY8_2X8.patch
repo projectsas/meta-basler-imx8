@@ -1,17 +1,17 @@
-From cfc2ef0c4ab3321cc0718e5090ab959bd19beeeb Mon Sep 17 00:00:00 2001
+From e0e415ec5f516a412a809f6e14cf4938a8877470 Mon Sep 17 00:00:00 2001
 From: Marvin Schmidt <Marvin.Schmidt@baslerweb.com>
 Date: Tue, 17 Dec 2019 18:14:26 +0100
-Subject: [PATCH 08/27] media: mxc: mipi_csi: Add UYVY8_2X8
+Subject: [PATCH 08/15] media: mxc: mipi_csi: Add UYVY8_2X8
 
 ---
  drivers/media/platform/mxc/capture/mxc_mipi_csi.c | 4 ++++
  1 file changed, 4 insertions(+)
 
 diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-index 61b7d39c3..898464221 100644
+index 6e337f241be4..8e8c09288476 100644
 --- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 +++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-@@ -321,6 +321,10 @@ static const struct csis_pix_format mipi_csis_formats[] = {
+@@ -320,6 +320,10 @@ static const struct csis_pix_format mipi_csis_formats[] = {
  		.code = MEDIA_BUS_FMT_VYUY8_2X8,
  		.fmt_reg = MIPI_CSIS_ISPCFG_FMT_YCBCR422_8BIT,
  		.data_alignment = 16,
@@ -23,5 +23,5 @@ index 61b7d39c3..898464221 100644
  		.code = MEDIA_BUS_FMT_SBGGR8_1X8,
  		.fmt_reg = MIPI_CSIS_ISPCFG_FMT_RAW8,
 -- 
-2.32.0
+2.33.0
 

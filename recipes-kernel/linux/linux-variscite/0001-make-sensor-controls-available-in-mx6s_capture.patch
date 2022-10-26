@@ -1,7 +1,7 @@
-From 5c86587ec1c784e121e14482b5caf4a79f2d4699 Mon Sep 17 00:00:00 2001
+From ca4e8e9247be7c078171822f9fa352bd2810e95b Mon Sep 17 00:00:00 2001
 From: Michael Singer <michael.singer@baslerweb.com>
 Date: Thu, 14 Nov 2019 18:59:13 +0100
-Subject: [PATCH 01/27] make sensor controls available in mx6s_capture
+Subject: [PATCH 01/15] make sensor controls available in mx6s_capture
 
 Our sensor driver provides V4L Extended Controls that need to be made available
 through the /dev/videoX file.
@@ -13,13 +13,12 @@ Port to 5.4.3 and adjust to the following API changes:
   * v4l2_{try,g,s}_ext_ctrls
 ---
  drivers/media/platform/imx8/mxc-mipi-csi2.h   |   3 +
- .../media/platform/imx8/mxc-mipi-csi2_yav.c   |  17 ++-
  .../media/platform/mxc/capture/mx6s_capture.c | 106 +++++++++++++++++-
  .../media/platform/mxc/capture/mxc_mipi_csi.c |  19 +++-
- 4 files changed, 142 insertions(+), 3 deletions(-)
+ 4 files changed, 130 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/imx8/mxc-mipi-csi2.h b/drivers/media/platform/imx8/mxc-mipi-csi2.h
-index cc53325b7..2acaecb99 100644
+index 3306f53220d2..bfc60797c448 100644
 --- a/drivers/media/platform/imx8/mxc-mipi-csi2.h
 +++ b/drivers/media/platform/imx8/mxc-mipi-csi2.h
 @@ -7,6 +7,7 @@
@@ -30,7 +29,7 @@ index cc53325b7..2acaecb99 100644
  
  #define MXC_MIPI_CSI2_DRIVER_NAME	"mxc-mipi-csi2"
  #define MXC_MIPI_CSI2_SUBDEV_NAME	MXC_MIPI_CSI2_DRIVER_NAME
-@@ -254,6 +255,8 @@ struct mxc_mipi_csi2_dev {
+@@ -253,6 +254,8 @@ struct mxc_mipi_csi2_dev {
  
  	struct mutex lock;
  
@@ -39,68 +38,8 @@ index cc53325b7..2acaecb99 100644
  	int	 id;
  	u32 hs_settle;
  	u32 send_level;
-diff --git a/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c b/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
-index 090a0c465..5b3d10b34 100644
---- a/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
-+++ b/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
-@@ -25,6 +25,7 @@
- #include <media/v4l2-fwnode.h>
- #include <media/v4l2-subdev.h>
- #include <media/v4l2-device.h>
-+#include <media/v4l2-ctrls.h>
- 
- #include "mxc-mipi-csi2.h"
- static int debug;
-@@ -487,6 +488,9 @@ static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
- 	if (subdev == NULL)
- 		return -EINVAL;
- 
-+	v4l2_ctrl_add_handler(csi2dev->sd.ctrl_handler, subdev->ctrl_handler,
-+		  NULL, true);
-+
- 	v4l2_info(&csi2dev->v4l2_dev, "Registered sensor subdevice: %s\n",
- 		  subdev->name);
- 
-@@ -594,11 +598,18 @@ static int mipi_csi2_probe(struct platform_device *pdev)
- 	csi2dev->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
- 	csi2dev->sd.dev = &pdev->dev;
- 
-+	/* Add the control handler */
-+	v4l2_ctrl_handler_init(&csi2dev->ctrl_handler, 10);
-+	if (csi2dev->ctrl_handler.error)
-+		return csi2dev->ctrl_handler.error;
-+	csi2dev->sd.ctrl_handler = &csi2dev->ctrl_handler;
-+
- 	/* First register a v4l2 device */
- 	ret = v4l2_device_register(dev, &csi2dev->v4l2_dev);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Unable to register v4l2 device.\n");
--		return -EINVAL;
-+		ret = -EINVAL;
-+		goto e_handler;
- 	}
- 	ret = v4l2_async_register_subdev(&csi2dev->sd);
- 	if (ret < 0) {
-@@ -635,6 +646,8 @@ static int mipi_csi2_probe(struct platform_device *pdev)
- 	v4l2_async_unregister_subdev(&csi2dev->sd);
- e_v4l_dev:
- 	v4l2_device_unregister(&csi2dev->v4l2_dev);
-+e_handler:
-+	v4l2_ctrl_handler_free(&csi2dev->ctrl_handler);
- 	return ret;
- }
- 
-@@ -645,6 +658,8 @@ static int mipi_csi2_remove(struct platform_device *pdev)
- 
- 	mipi_csi2_clk_disable(csi2dev);
- 	pm_runtime_disable(&pdev->dev);
-+	v4l2_ctrl_handler_free(sd->ctrl_handler);
-+	sd->ctrl_handler = NULL;
- 
- 	return 0;
- }
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index 433f2d124..14d6bf805 100644
+index 39bef1e160b9..a6e631bf664c 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -1677,6 +1677,102 @@ static int mx6s_vidioc_enum_frameintervals(struct file *file, void *priv,
@@ -221,7 +160,7 @@ index 433f2d124..14d6bf805 100644
  };
  
  static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
-@@ -1830,7 +1934,7 @@ static int mx6sx_register_subdevs(struct mx6s_csi_dev *csi_dev)
+@@ -1827,7 +1931,7 @@ static int mx6sx_register_subdevs(struct mx6s_csi_dev *csi_dev)
  					&csi_dev->subdev_notifier);
  	if (ret)
  		dev_err(csi_dev->dev,
@@ -231,7 +170,7 @@ index 433f2d124..14d6bf805 100644
  	return ret;
  }
 diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-index 069a0b9bb..85dbccda6 100644
+index db9101f573cc..f0ddcc1f52bf 100644
 --- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 +++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 @@ -38,6 +38,7 @@
@@ -242,7 +181,7 @@ index 069a0b9bb..85dbccda6 100644
  
  static int debug;
  module_param(debug, int, 0644);
-@@ -292,6 +293,8 @@ struct csi_state {
+@@ -291,6 +292,8 @@ struct csi_state {
  
  	struct csis_hw_reset hw_reset;
  	struct regulator     *mipi_phy_regulator;
@@ -251,7 +190,7 @@ index 069a0b9bb..85dbccda6 100644
  };
  
  /**
-@@ -936,6 +939,9 @@ static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
+@@ -935,6 +938,9 @@ static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
  	if (subdev == NULL)
  		return -EINVAL;
  
@@ -261,7 +200,7 @@ index 069a0b9bb..85dbccda6 100644
  	v4l2_info(&state->v4l2_dev, "Registered sensor subdevice: %s\n",
  		  subdev->name);
  
-@@ -1132,12 +1138,20 @@ static int mipi_csis_probe(struct platform_device *pdev)
+@@ -1133,12 +1139,20 @@ static int mipi_csis_probe(struct platform_device *pdev)
  		goto e_clkdis;
  	}
  
@@ -283,7 +222,7 @@ index 069a0b9bb..85dbccda6 100644
  	}
  	v4l2_info(&state->v4l2_dev, "mipi csi v4l2 device registered\n");
  
-@@ -1174,6 +1188,8 @@ static int mipi_csis_probe(struct platform_device *pdev)
+@@ -1175,6 +1189,8 @@ static int mipi_csis_probe(struct platform_device *pdev)
  	v4l2_device_unregister(&state->v4l2_dev);
  e_sd_mipi:
  	v4l2_async_unregister_subdev(&state->mipi_sd);
@@ -292,8 +231,8 @@ index 069a0b9bb..85dbccda6 100644
  e_clkdis:
  	mipi_csis_clk_disable(state);
  	return ret;
-@@ -1274,6 +1290,7 @@ static int mipi_csis_remove(struct platform_device *pdev)
- 	v4l2_async_unregister_subdev(&state->mipi_sd);
+@@ -1276,6 +1292,7 @@ static int mipi_csis_remove(struct platform_device *pdev)
+ 	v4l2_async_notifier_cleanup(&state->subdev_notifier);
  	v4l2_async_notifier_unregister(&state->subdev_notifier);
  	v4l2_device_unregister(&state->v4l2_dev);
 +	v4l2_ctrl_handler_free(&state->ctrl_handler);
@@ -301,5 +240,5 @@ index 069a0b9bb..85dbccda6 100644
  	pm_runtime_disable(&pdev->dev);
  	mipi_csis_pm_suspend(&pdev->dev, true);
 -- 
-2.32.0
+2.33.0
 

@@ -1,15 +1,15 @@
-From 005716da7a36ffacc223f64d551b649973257be8 Mon Sep 17 00:00:00 2001
+From 2f2e9ac3e53e7f2a75993b969a0686631f3c8090 Mon Sep 17 00:00:00 2001
 From: Thies Moeller <thies.moeller@baslerweb.com>
 Date: Fri, 25 Jun 2021 16:29:22 +0200
-Subject: [PATCH 15/27] mxc: capture: Add debug event/interrupt counters
+Subject: [PATCH 11/15] mxc: capture: Add debug event/interrupt counters
 
 ---
  .../media/platform/mxc/capture/mx6s_capture.c | 77 +++++++++++++++++++
- .../media/platform/mxc/capture/mxc_mipi_csi.c |  9 +++
- 2 files changed, 86 insertions(+)
+ .../media/platform/mxc/capture/mxc_mipi_csi.c | 10 ++-
+ 2 files changed, 86 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index dd1bb3d57..c54b6d554 100644
+index 7b31d86dddd5..4acd142e9c7e 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -172,6 +172,34 @@
@@ -138,7 +138,7 @@ index dd1bb3d57..c54b6d554 100644
  	return ret;
  }
  
-@@ -2048,6 +2122,9 @@ static int mx6s_csi_probe(struct platform_device *pdev)
+@@ -2045,6 +2119,9 @@ static int mx6s_csi_probe(struct platform_device *pdev)
  		return -EINVAL;
  	csi_dev->soc = of_id->data;
  
@@ -149,7 +149,7 @@ index dd1bb3d57..c54b6d554 100644
  		 sizeof(csi_dev->v4l2_dev.name), "CSI");
  
 diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-index e8741ac0d..0c16acb65 100644
+index c50ad3a0b686..b9649c7b7561 100644
 --- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 +++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 @@ -287,6 +287,8 @@ struct csi_state {
@@ -158,10 +158,10 @@ index e8741ac0d..0c16acb65 100644
  
 +	unsigned long BaslerIrq;
 +
- 	struct v4l2_async_subdev    asd;
+ 	struct fwnode_handle *fwnode;
  	struct v4l2_async_notifier  subdev_notifier;
- 	struct v4l2_async_subdev    *async_subdevs[2];
-@@ -658,6 +660,9 @@ static void mipi_csis_clear_counters(struct csi_state *state)
+ 
+@@ -657,6 +659,9 @@ static void mipi_csis_clear_counters(struct csi_state *state)
  	spin_lock_irqsave(&state->slock, flags);
  	for (i = 0; i < MIPI_CSIS_NUM_EVENTS; i++)
  		state->events[i].counter = 0;
@@ -171,7 +171,7 @@ index e8741ac0d..0c16acb65 100644
  	spin_unlock_irqrestore(&state->slock, flags);
  }
  
-@@ -668,6 +673,8 @@ static void mipi_csis_log_counters(struct csi_state *state, bool non_errors)
+@@ -667,6 +672,8 @@ static void mipi_csis_log_counters(struct csi_state *state, bool non_errors)
  
  	spin_lock_irqsave(&state->slock, flags);
  
@@ -180,7 +180,7 @@ index e8741ac0d..0c16acb65 100644
  	for (i--; i >= 0; i--) {
  		if (state->events[i].counter > 0 || debug)
  			v4l2_info(&state->mipi_sd, "%s events: %d\n",
-@@ -907,6 +914,8 @@ static irqreturn_t mipi_csis_irq_handler(int irq, void *dev_id)
+@@ -906,6 +913,8 @@ static irqreturn_t mipi_csis_irq_handler(int irq, void *dev_id)
  
  	spin_lock_irqsave(&state->slock, flags);
  
@@ -190,5 +190,5 @@ index e8741ac0d..0c16acb65 100644
  		u32 offset;
  
 -- 
-2.32.0
+2.33.0
 
