@@ -39,9 +39,6 @@ do_install() {
     dest_dir=${D}/opt/imx8-isp/bin
     install -d $dest_dir
     cp -a --no-preserve=ownership ${S}/opt/* ${D}/opt/
-    # fix permissions for group and others
-    find ${D}/opt -perm 700 -exec chmod 755 {} \;
-    find ${D}/opt -perm 600 -exec chmod 644 {} \;
 }
 
 FILES:${PN} += "/opt/*"

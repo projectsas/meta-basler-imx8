@@ -1,7 +1,7 @@
 LICENSE = "Basler-SLA-02 & BSD-3-Clause & OpenSSL"
 LIC_FILES_CHKSUM = "file://opt/dart-bcon-mipi/share/doc/${PN}/copyright;md5=ff8962a0d69b960bd5b0a2bd0c97c184"
 # checksum of the selfsh for this camera module
-SRC_URI[tarball.sha256sum] = "8b2416e218be0c9c0a06990bfaa2de75af01f03472191778db39000ac6d56e5b"
+SRC_URI[tarball.sha256sum] = "f86a08615bf34cae87ad0828e1345487ceebd9e515f0643a17e9a2c9723c600a"
 
 require basler-dart-bcon-mipi.inc
 

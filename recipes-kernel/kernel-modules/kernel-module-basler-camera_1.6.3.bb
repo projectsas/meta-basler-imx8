@@ -1,11 +1,11 @@
 SUMMARY = "Basler camera sensor driver"
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://../COPYING;md5=801f80980d171dd6425610833a22dbe6"
+LIC_FILES_CHKSUM = "file://../COPYING;md5=288618fe39e7689c3712691843e7c40c"
 
 inherit module
 
 SRC_URI = "https://artifacts.baslerweb.com/artifactory/embedded-vision-public/packages/basler-camera-driver/basler-camera-driver_${PV}.tgz"
-SRC_URI[sha256sum] = "c2e62fc7774da42cbbf1043a8d06c262b68b05632ab666ce60118c9133cc8090"
+SRC_URI[sha256sum] = "60bbe80eeeb0578fdd94bdd4333d9a4246cc56714a2884e8612423db485b7323"
 S = "${WORKDIR}/basler-camera-driver_${PV}/basler-camera-driver"
 
 

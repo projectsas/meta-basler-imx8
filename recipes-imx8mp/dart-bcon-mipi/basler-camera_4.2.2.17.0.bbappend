@@ -1,4 +1,4 @@
-# This bbappend removes all files from the package, as everything is installed by basler-daa3840-30mc-imx-isp-driver
+# This bbappend removes all files from the package, as everything is installed by basler-daa*-imx-isp-driver
 
 do_install:append() {
     # don't do rm -rf ${D}/* for paranoic reasons since $D might be empty

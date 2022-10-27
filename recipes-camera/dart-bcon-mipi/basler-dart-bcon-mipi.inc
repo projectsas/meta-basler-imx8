@@ -52,10 +52,6 @@ do_install[dirs] += "${D}/opt"
 
 do_install() {
     cp -a --no-preserve=ownership ${S}/* ${D}
-    # fix permissions for group and others
-    find ${D} -perm 700 -exec chmod 755 {} \;
-    find ${D} -perm 600 -exec chmod 644 {} \;
-    
     install -D "${WORKDIR}/set-gentl-path.sh" "${D}/etc/profile.d/${BPN}.sh"
 }
 

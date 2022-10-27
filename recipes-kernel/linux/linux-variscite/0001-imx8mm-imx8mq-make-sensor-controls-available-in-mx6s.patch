@@ -1,7 +1,8 @@
-From ca4e8e9247be7c078171822f9fa352bd2810e95b Mon Sep 17 00:00:00 2001
+From 6a58205b19ecb734804cef592bf288403d258ad6 Mon Sep 17 00:00:00 2001
 From: Michael Singer <michael.singer@baslerweb.com>
 Date: Thu, 14 Nov 2019 18:59:13 +0100
-Subject: [PATCH 01/15] make sensor controls available in mx6s_capture
+Subject: [PATCH 01/20] [imx8mm, imx8mq] make sensor controls available in
+ mx6s_capture
 
 Our sensor driver provides V4L Extended Controls that need to be made available
 through the /dev/videoX file.
@@ -13,12 +14,13 @@ Port to 5.4.3 and adjust to the following API changes:
   * v4l2_{try,g,s}_ext_ctrls
 ---
  drivers/media/platform/imx8/mxc-mipi-csi2.h   |   3 +
+ .../media/platform/imx8/mxc-mipi-csi2_yav.c   |  17 ++-
  .../media/platform/mxc/capture/mx6s_capture.c | 106 +++++++++++++++++-
  .../media/platform/mxc/capture/mxc_mipi_csi.c |  19 +++-
- 4 files changed, 130 insertions(+), 5 deletions(-)
+ 4 files changed, 142 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/imx8/mxc-mipi-csi2.h b/drivers/media/platform/imx8/mxc-mipi-csi2.h
-index 3306f53220d2..bfc60797c448 100644
+index 3306f5322..bfc60797c 100644
 --- a/drivers/media/platform/imx8/mxc-mipi-csi2.h
 +++ b/drivers/media/platform/imx8/mxc-mipi-csi2.h
 @@ -7,6 +7,7 @@
@@ -38,8 +40,68 @@ index 3306f53220d2..bfc60797c448 100644
  	int	 id;
  	u32 hs_settle;
  	u32 send_level;
+diff --git a/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c b/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
+index 9fa951b50..fa3fbef37 100644
+--- a/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
++++ b/drivers/media/platform/imx8/mxc-mipi-csi2_yav.c
+@@ -25,6 +25,7 @@
+ #include <media/v4l2-fwnode.h>
+ #include <media/v4l2-subdev.h>
+ #include <media/v4l2-device.h>
++#include <media/v4l2-ctrls.h>
+ 
+ #include "mxc-mipi-csi2.h"
+ static int debug;
+@@ -487,6 +488,9 @@ static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
+ 	if (csi2dev->fwnode == of_fwnode_handle(subdev->dev->of_node))
+ 		csi2dev->sensor_sd = subdev;
+ 
++	v4l2_ctrl_add_handler(csi2dev->sd.ctrl_handler, subdev->ctrl_handler,
++		  NULL, true);
++
+ 	v4l2_info(&csi2dev->v4l2_dev, "Registered sensor subdevice: %s\n",
+ 		  subdev->name);
+ 
+@@ -594,11 +598,18 @@ static int mipi_csi2_probe(struct platform_device *pdev)
+ 	csi2dev->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
+ 	csi2dev->sd.dev = &pdev->dev;
+ 
++	/* Add the control handler */
++	v4l2_ctrl_handler_init(&csi2dev->ctrl_handler, 10);
++	if (csi2dev->ctrl_handler.error)
++		return csi2dev->ctrl_handler.error;
++	csi2dev->sd.ctrl_handler = &csi2dev->ctrl_handler;
++
+ 	/* First register a v4l2 device */
+ 	ret = v4l2_device_register(dev, &csi2dev->v4l2_dev);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Unable to register v4l2 device.\n");
+-		return -EINVAL;
++		ret = -EINVAL;
++		goto e_handler;
+ 	}
+ 	ret = v4l2_async_register_subdev(&csi2dev->sd);
+ 	if (ret < 0) {
+@@ -635,6 +646,8 @@ static int mipi_csi2_probe(struct platform_device *pdev)
+ 	v4l2_async_unregister_subdev(&csi2dev->sd);
+ e_v4l_dev:
+ 	v4l2_device_unregister(&csi2dev->v4l2_dev);
++e_handler:
++	v4l2_ctrl_handler_free(&csi2dev->ctrl_handler);
+ 	return ret;
+ }
+ 
+@@ -646,6 +659,8 @@ static int mipi_csi2_remove(struct platform_device *pdev)
+ 	v4l2_async_notifier_cleanup(&csi2dev->subdev_notifier);
+ 	mipi_csi2_clk_disable(csi2dev);
+ 	pm_runtime_disable(&pdev->dev);
++	v4l2_ctrl_handler_free(sd->ctrl_handler);
++	sd->ctrl_handler = NULL;
+ 
+ 	return 0;
+ }
 diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
-index 39bef1e160b9..a6e631bf664c 100644
+index 39bef1e16..a6e631bf6 100644
 --- a/drivers/media/platform/mxc/capture/mx6s_capture.c
 +++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
 @@ -1677,6 +1677,102 @@ static int mx6s_vidioc_enum_frameintervals(struct file *file, void *priv,
@@ -170,7 +232,7 @@ index 39bef1e160b9..a6e631bf664c 100644
  	return ret;
  }
 diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
-index db9101f573cc..f0ddcc1f52bf 100644
+index db9101f57..f0ddcc1f5 100644
 --- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 +++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
 @@ -38,6 +38,7 @@
@@ -240,5 +302,5 @@ index db9101f573cc..f0ddcc1f52bf 100644
  	pm_runtime_disable(&pdev->dev);
  	mipi_csis_pm_suspend(&pdev->dev, true);
 -- 
-2.33.0
+2.33.1
 
